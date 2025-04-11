@@ -1,0 +1,26 @@
+name: Muddy Waters Watchdog
+ 
+on:
+  schedule:
+    - cron: "*/2 * * * *"  # Every 2 minutes
+  workflow_dispatch:  # Manual trigger option
+ 
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: Install dependencies
+        run: pip install requests
+      - name: Run checker
+        env:
+          PUSHOVER_TOKEN: ${{ secrets.PUSHOVER_TOKEN }}
+          PUSHOVER_USER: ${{ secrets.PUSHOVER_USER }}
+        run: |
+          sed -i "s|REPLACE_ME|$PUSHOVER_TOKEN|" check_muddy.py
+          sed -i "0,/REPLACE_ME/s//${PUSHOVER_USER}/" check_muddy.py
+          python check_muddy.py
